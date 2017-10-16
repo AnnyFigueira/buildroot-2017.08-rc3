@@ -84,6 +84,7 @@ else # umask / $(CURDIR) / $(O)
 
 # This is our default rule, so must come first
 all:
+
 .PHONY: all
 
 # Set and export the version string
@@ -1105,3 +1106,5 @@ include docs/manual/manual.mk
 .PHONY: $(noconfig_targets)
 
 endif #umask / $(CURDIR) / $(O)
+
+
