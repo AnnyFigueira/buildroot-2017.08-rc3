@@ -98,25 +98,20 @@ int main(int argc, char **argv){
     
     output = (char*)malloc(sizeof(char)*buffer);
     
+    char* s = argv[3];
+    
+    int s_size = strlen(s);
+    
     int sched = atoi(argv[3]);
     
-    int isched;
-    
-    switch(sched)
+    if (s_size > 6)
     {
-        case SCHED_FIFO: 
-			isched = SCHED_FIFO;
-			break;
-		case SCHED_RR: 
-			isched = SCHED_RR;
-			break;
-		case SCHED_OTHER: 
-			isched = SCHED_OTHER;
-			break;
-		default:
-			isched = 0;
-			break;
+        if (s[6] == 'F') sched = SCHED_FIFO;
+        else if (s[6] == 'R') sched = SCHED_RR;
+        else if (s[6] == 'O') sched = SCHED_OTHER;
     }
+    
+    printf("Sched: %d \n", sched);
     
     int priority = atoi(argv[4]);
     
@@ -140,7 +135,7 @@ int main(int argc, char **argv){
 	    int data = i+65;
 	    pthread_create(&thr[i], NULL, (void *) run, (void *) data);
 	    //printf("criou thread"); 
-	    setpriority(&thr[i], isched, priority);
+	    setpriority(&thr[i], sched, priority);
 	    //printf("setou a prioridade");
 	}
 	
@@ -152,10 +147,54 @@ int main(int argc, char **argv){
 
     for(int i = 0; i < N; i++) { pthread_join(thr[i], NULL); }
     
-    for(int i = 0; i < buffer; i++)
+    int end_pos = 0;
+    
+    char* order = (char*)malloc(sizeof(char)*buffer);
+    
+    char previous = -1;
+    
+    char current;
+    
+    for (int i = 0; i < buffer; i++)
     {
-        printf("%c", output[i]);
+        current = output[i];
+        if (current != previous)
+        {
+            order[end_pos] = current;    
+            previous = current;
+            end_pos++;
+        }
     }
+    
+    for(int i = 0; i < end_pos; i++)
+    {
+        printf("%c", order[i]);
+    }
+    
+    printf("\n");
+    
+    int* amount = (int*)malloc(sizeof(int)*N);
+    
+    for(int i = 0; i < N; i++)
+    {
+        amount[i] = 0;
+    }    
+    
+    int cur_pos = 0;
+    
+    for(int i = 0; i < end_pos; i++)
+    {
+        cur_pos = order[i]-65;
+        amount[cur_pos] = amount[cur_pos] + 1;
+    }
+    
+    for(int i = 0; i < N; i++)
+    {
+        char cur = 0;
+        cur = i+65;
+        printf ("%c = %d \n", cur, amount[i]);
+    }
+    
     
 	return 0;
 }
