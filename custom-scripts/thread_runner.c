@@ -6,6 +6,8 @@
 #include <linux/sched.h>
 #include <semaphore.h>
 #include <math.h>
+#include <time.h>
+#include <sys/time.h>
 
 int  N;
 int buffer;
@@ -50,6 +52,12 @@ void print_sched(int policy){
 		case SCHED_OTHER: 
 			printf("SCHED_OTHER\n");
 			break;
+	    case SCHED_IDLE:
+	        printf("SCHED_IDLE\n");
+	        break;
+	    case SCHED_LOW_IDLE:
+	        printf("SCHED_LOW_IDLE\n");
+	        break;
 		default:
 			printf("unknown\n");
 			break;
@@ -109,6 +117,8 @@ int main(int argc, char **argv){
         if (s[6] == 'F') sched = SCHED_FIFO;
         else if (s[6] == 'R') sched = SCHED_RR;
         else if (s[6] == 'O') sched = SCHED_OTHER;
+        else if (s[6] == 'I') sched = SCHED_IDLE;
+        else if (s[6] == 'L') sched = SCHED_LOW_IDLE;
     }
     
     printf("Sched: %d \n", sched);
@@ -139,13 +149,29 @@ int main(int argc, char **argv){
 	    //printf("setou a prioridade");
 	}
 	
+	//time_t start;
+	
+	//start = time(NULL);
+	
+	unsigned long x = 0xFFFFFFFF;
+	struct timespec start, finish;
+	long delta_usecs;
+	
+	clock_gettime(CLOCK_MONOTONIC, &start);
+	
 	sem_post(&mutex);
 	
-	sleep(timesleep);
+	//sleep(timesleep);
     
     running = 0;
 
     for(int i = 0; i < N; i++) { pthread_join(thr[i], NULL); }
+    
+    //time_t end;
+    
+    //end = time(NULL);
+    
+    clock_gettime(CLOCK_MONOTONIC, &finish);
     
     int end_pos = 0;
     
@@ -195,6 +221,11 @@ int main(int argc, char **argv){
         printf ("%c = %d \n", cur, amount[i]);
     }
     
+    //double seconds =  difftime(end, start);
     
+    delta_usecs = (finish.tv_sec - start.tv_sec) * 1000000 + (finish.tv_nsec - start.tv_nsec) / 1000;
+    
+    printf("Tempo de execução do sched %d: %dus\n", sched, delta_usecs);
+       
 	return 0;
 }
